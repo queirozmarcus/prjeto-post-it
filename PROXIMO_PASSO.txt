@@ -1,0 +1,30 @@
+# Projeto Post-it Concluído!
+
+O bootstrap completo foi realizado com sucesso.
+
+## Como Executar
+1. Certifique-se de que o Docker está rodando.
+2. Na raiz do projeto, execute:
+   docker-compose up -d --build
+
+3. Acesse:
+   - Frontend: http://localhost:3000
+   - API Docs (Swagger): http://localhost:8080/swagger-ui.html
+   - Health Status: http://localhost:8080/actuator/health
+
+## Estrutura do Backend (Arquitetura Hexagonal)
+- domain: Regras de negócio puras (Postit Record).
+- application.ports: Contratos de entrada e saída.
+- application.usecases: Lógica de negócio (PostitUseCase).
+- infrastructure.adapters.in: Controller REST e DTOs.
+- infrastructure.adapters.out: Persistência (JPA + PostgreSQL).
+- shared: Exceções e erros formatados conforme RFC 9457.
+
+## Frontend (Vue.js + Vite)
+- UI Moderna em Grid com ícones Lucide.
+- Proxy Reverso via Nginx para evitar CORS.
+- Estilização Vanilla CSS (Sticky Note Style).
+
+## QA
+- Unit Tests: PostitUseCaseTest (Mockito).
+- Integration Tests: PostitPersistenceAdapterIntegrationTest (Testcontainers + PostgreSQL).

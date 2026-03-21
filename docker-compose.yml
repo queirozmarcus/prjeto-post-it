@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: postit-db
+    environment:
+      POSTGRES_DB: postit_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d postit_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postit_data:/var/lib/postgresql/data
+    networks:
+      - postit-network
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: postit-api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postit_db
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_FLYWAY_URL: jdbc:postgresql://db:5432/postit_db
+      SPRING_FLYWAY_USER: user
+      SPRING_FLYWAY_PASSWORD: password
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - postit-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: postit-frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    networks:
+      - postit-network
+
+networks:
+  postit-network:
+    driver: bridge
+
+volumes:
+  postit_data:

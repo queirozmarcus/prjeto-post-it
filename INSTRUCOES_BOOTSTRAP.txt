@@ -1,0 +1,9 @@
+# BOOTSTRAP COMPLETO - prjeto-post-it
+
+Execute este comando para criar toda a estrutura do projeto:
+
+python3 bootstrap_minimal.py
+
+## PASSO 2 - Criar todos os arquivos de código:
+
+python3 generate_all_files.py
