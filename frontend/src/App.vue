@@ -1,64 +1,55 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
-import { Plus, Trash2, StickyNote, Sparkles, PlusCircle } from 'lucide-vue-next'
+import { onMounted } from 'vue';
+import { StickyNote, Sparkles, AlertCircle } from 'lucide-vue-next';
+import PostitForm from './components/PostitForm.vue';
+import PostitGrid from './components/PostitGrid.vue';
+import { usePostits } from './composables/usePostits';
+import type { PostitRequest } from './services/postitApi';
 
-interface Postit {
-  id: number
-  content: string
-  color: string
-}
+// Composable para gerenciar estado de post-its
+const { postits, isLoading, error, isCreating, fetchPostits, createPostit, deletePostit } =
+  usePostits();
 
-const postits = ref<Postit[]>([])
-const newContent = ref('')
-const newColor = ref('#fef68a') // Amarelo post-it clássico mas pastel
+/**
+ * Lifecycle: Busca post-its ao montar o componente
+ */
+onMounted(async () => {
+  await fetchPostits();
+});
 
-const fetchPostits = async () => {
-  try {
-    const response = await axios.get('/api/v1/postits')
-    postits.value = response.data
-  } catch (error) {
-    console.error('Erro ao buscar post-its:', error)
+/**
+ * Handler para criação de nova nota
+ */
+const handleCreatePostit = async (request: PostitRequest) => {
+  const created = await createPostit(request);
+  if (created) {
+    // Sucesso — a nota foi adicionada à lista automaticamente
+    // Pode adicionar notificação aqui se desejar
   }
-}
+};
 
-const createPostit = async () => {
-  if (!newContent.value.trim()) return
-  
-  try {
-    const response = await axios.post('/api/v1/postits', {
-      content: newContent.value,
-      color: newColor.value
-    })
-    postits.value.unshift(response.data) // Adiciona no início
-    newContent.value = ''
-  } catch (error) {
-    console.error('Erro ao criar post-it:', error)
+/**
+ * Handler para deleção de nota
+ */
+const handleDeletePostit = async (id: number) => {
+  const confirmed = confirm('Tem certeza que deseja excluir esta nota?');
+  if (confirmed) {
+    await deletePostit(id);
   }
-}
-
-const deletePostit = async (id: number) => {
-  try {
-    await axios.delete(`/api/v1/postits/${id}`)
-    postits.value = postits.value.filter(p => p.id !== id)
-  } catch (error) {
-    console.error('Erro ao excluir post-it:', error)
-  }
-}
-
-onMounted(fetchPostits)
+};
 </script>
 
 <template>
   <div class="app-wrapper">
-    <!-- Background estético -->
+    <!-- Background decorativo -->
     <div class="bg-blobs">
       <div class="blob blob-1"></div>
       <div class="blob blob-2"></div>
     </div>
 
     <div class="container">
-      <header>
+      <!-- Header -->
+      <header class="app-header">
         <div class="logo">
           <div class="icon-box">
             <StickyNote :size="28" color="#fff" />
@@ -66,59 +57,42 @@ onMounted(fetchPostits)
           <h1>Post<span>it</span>.</h1>
         </div>
         <div class="status-badge">
-          <Sparkles :size="14" /> Marcus Edition
+          <Sparkles :size="14" />
+          <span>Vue 3 App</span>
         </div>
       </header>
 
-      <main>
-        <section class="input-card">
-          <div class="input-header">
-            <span>O que está na sua mente?</span>
-            <div class="color-picker-wrapper">
-              <input type="color" v-model="newColor" title="Escolha a cor" />
-            </div>
+      <!-- Main content -->
+      <main class="app-main">
+        <!-- Error alert (global) -->
+        <div v-if="error" class="error-alert">
+          <AlertCircle :size="20" />
+          <div class="error-content">
+            <strong>Erro:</strong>
+            <p>{{ error }}</p>
           </div>
-          <textarea 
-            v-model="newContent" 
-            placeholder="Digite sua nota aqui... (Ctrl + Enter para salvar)"
-            @keyup.enter.ctrl="createPostit"
-          ></textarea>
-          <div class="input-footer">
-            <p class="hint">Dica: Use cores diferentes para categorias.</p>
-            <button @click="createPostit" :disabled="!newContent.trim()" class="btn-add">
-              <PlusCircle :size="18" /> Criar Nota
-            </button>
-          </div>
-        </section>
+        </div>
 
-        <section class="notes-grid">
-          <TransitionGroup name="list">
-            <div 
-              v-for="postit in postits" 
-              :key="postit.id" 
-              class="note"
-              :style="{ backgroundColor: postit.color }"
-            >
-              <div class="note-pin"></div>
-              <div class="note-body">
-                <p>{{ postit.content }}</p>
-              </div>
-              <div class="note-footer">
-                <button class="btn-delete" @click="deletePostit(postit.id)" title="Excluir">
-                  <Trash2 :size="16" />
-                </button>
-              </div>
-            </div>
-          </TransitionGroup>
-        </section>
+        <!-- Formulário para criar nota -->
+        <PostitForm @submit="handleCreatePostit" @loading="(val) => (isCreating = val)" />
+
+        <!-- Grid de notas -->
+        <PostitGrid
+          :postits="postits"
+          :isLoading="isLoading"
+          @delete="handleDeletePostit"
+        />
       </main>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <p>Built with ❤️ using Vue 3 + Spring Boot</p>
+      </footer>
     </div>
   </div>
 </template>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Gochi+Hand&display=swap');
-
+<style scoped>
 :root {
   --primary: #6366f1;
   --primary-hover: #4f46e5;
@@ -128,27 +102,15 @@ onMounted(fetchPostits)
   --text-dim: #94a3b8;
 }
 
-* {
-  box-sizing: border-box;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--bg-main);
-  color: var(--text-main);
-  overflow-x: hidden;
-}
-
 .app-wrapper {
   min-height: 100vh;
   position: relative;
   padding: 2rem 1rem;
+  background-color: var(--bg-main);
+  color: var(--text-main);
 }
 
-/* Background Estético */
+/* Background decorativo */
 .bg-blobs {
   position: fixed;
   top: 0;
@@ -157,23 +119,41 @@ body {
   height: 100%;
   z-index: -1;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .blob {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.2) 0%,
+    rgba(168, 85, 247, 0.2) 100%
+  );
   filter: blur(80px);
   border-radius: 50%;
 }
 
-.blob-1 { top: -100px; right: -100px; animation: orbit 20s infinite linear; }
-.blob-2 { bottom: -100px; left: -100px; animation: orbit 25s infinite linear reverse; }
+.blob-1 {
+  top: -100px;
+  right: -100px;
+  animation: orbit 20s infinite linear;
+}
+
+.blob-2 {
+  bottom: -100px;
+  left: -100px;
+  animation: orbit 25s infinite linear reverse;
+}
 
 @keyframes orbit {
-  from { transform: rotate(0deg) translateX(50px) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
+  from {
+    transform: rotate(0deg) translateX(50px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(50px) rotate(-360deg);
+  }
 }
 
 .container {
@@ -181,12 +161,24 @@ body {
   margin: 0 auto;
 }
 
-/* Header Estiloso */
-header {
+/* Header */
+.app-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 3rem;
+  animation: slideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .logo {
@@ -200,6 +192,9 @@ header {
   padding: 0.5rem;
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logo h1 {
@@ -226,204 +221,109 @@ header {
   color: var(--text-dim);
 }
 
-/* Input Card */
-.input-card {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 1.5rem;
-  margin-bottom: 4rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+/* Main content */
+.app-main {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.input-header {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Error alert */
+.error-alert {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  align-items: flex-start;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  color: #fca5a5;
+  animation: slideDown 0.3s ease;
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-content strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+.error-content p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Footer */
+.app-footer {
+  text-align: center;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-dim);
   font-size: 0.9rem;
-  font-weight: 600;
 }
 
-.color-picker-wrapper {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-input[type="color"] {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  cursor: pointer;
-  border: none;
-}
-
-textarea {
-  width: 100%;
-  height: 120px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 1.25rem;
-  color: white;
-  font-size: 1.1rem;
-  font-family: 'Inter', sans-serif;
-  resize: none;
-  outline: none;
-}
-
-textarea:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-}
-
-.input-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1rem;
-}
-
-.hint {
-  font-size: 0.8rem;
-  color: var(--text-dim);
+.app-footer p {
   margin: 0;
 }
 
-.btn-add {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
-}
-
-.btn-add:hover:not(:disabled) {
-  background: var(--primary-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.23);
-}
-
-.btn-add:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  filter: grayscale(1);
-}
-
-/* Grid de Notas */
-.notes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 2rem;
-}
-
-.note {
-  min-height: 260px;
-  padding: 2rem 1.5rem 1.5rem;
-  border-radius: 2px 2px 40px 2px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  color: #1e293b; /* Texto escuro para post-its claros */
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3), 
-              inset 0 -10px 20px rgba(0, 0, 0, 0.05);
-  transform: rotate(var(--rotation, -1deg));
-}
-
-.note:nth-child(even) { --rotation: 1.5deg; }
-.note:nth-child(3n) { --rotation: -2deg; }
-.note:nth-child(4n) { --rotation: 1deg; }
-
-.note:hover {
-  transform: scale(1.05) rotate(0deg);
-  z-index: 10;
-  box-shadow: 10px 20px 30px rgba(0, 0, 0, 0.4);
-}
-
-.note-pin {
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 12px;
-  height: 12px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.note-body {
-  font-family: 'Gochi Hand', cursive;
-  font-size: 1.4rem;
-  line-height: 1.4;
-  overflow-y: auto;
-}
-
-.note-footer {
-  display: flex;
-  justify-content: flex-end;
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.note:hover .note-footer {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.btn-delete {
-  background: rgba(0, 0, 0, 0.1);
-  border: none;
-  padding: 0.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  color: inherit;
-}
-
-.btn-delete:hover {
-  background: rgba(255, 0, 0, 0.2);
-  color: #ef4444;
-}
-
-/* Animações de Lista */
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.5s ease;
-}
-.list-enter-from {
-  opacity: 0;
-  transform: translateY(30px) scale(0.5);
-}
-.list-leave-to {
-  opacity: 0;
-  transform: scale(0.2);
-}
-
 /* Responsividade */
-@media (max-width: 640px) {
-  .notes-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 768px) {
+  .app-wrapper {
+    padding: 1rem;
   }
-  .input-footer {
+
+  .app-header {
     flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
-    align-items: stretch;
+    margin-bottom: 2rem;
   }
-  .hint { text-align: center; }
+
+  .logo h1 {
+    font-size: 1.5rem;
+  }
+
+  .container {
+    padding: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-wrapper {
+    padding: 0.75rem;
+  }
+
+  .logo {
+    gap: 0.5rem;
+  }
+
+  .icon-box {
+    padding: 0.375rem;
+  }
+
+  .logo h1 {
+    font-size: 1.25rem;
+  }
+
+  .status-badge {
+    font-size: 0.65rem;
+  }
+
+  .error-alert {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 }
 </style>
