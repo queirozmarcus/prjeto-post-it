@@ -3,9 +3,12 @@ import { computed } from 'vue';
 import PostitCard from './PostitCard.vue';
 import type { Postit } from '../services/postitApi';
 
+type CardSize = 'small' | 'medium' | 'large';
+
 interface Props {
   postits: Postit[];
   isLoading?: boolean;
+  cardSize?: CardSize;
 }
 
 interface Emits {
@@ -14,11 +17,21 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   isLoading: false,
+  cardSize: 'large',
 });
 
 defineEmits<Emits>();
 
 const isEmpty = computed(() => props.postits.length === 0);
+
+const gridMinWidth = computed(() => {
+  const widths: Record<CardSize, string> = {
+    small: '140px',
+    medium: '200px',
+    large: '260px',
+  };
+  return widths[props.cardSize];
+});
 </script>
 
 <template>
@@ -37,11 +50,17 @@ const isEmpty = computed(() => props.postits.length === 0);
     </div>
 
     <!-- Grid de notas -->
-    <TransitionGroup v-else name="list" class="postit-grid">
+    <TransitionGroup
+      v-else
+      name="list"
+      class="postit-grid"
+      :style="{ '--grid-min-width': gridMinWidth }"
+    >
       <PostitCard
         v-for="postit in postits"
         :key="postit.id"
         :postit="postit"
+        :size="cardSize"
         @delete="$emit('delete', $event)"
       />
     </TransitionGroup>
@@ -55,9 +74,10 @@ const isEmpty = computed(() => props.postits.length === 0);
 
 .postit-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width, 260px), 1fr));
   gap: 2rem;
   animation: fadeIn 0.5s ease-in;
+  transition: grid-template-columns 0.3s ease;
 }
 
 @keyframes fadeIn {

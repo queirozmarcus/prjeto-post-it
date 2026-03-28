@@ -3,15 +3,20 @@ import { computed } from 'vue';
 import { Trash2 } from 'lucide-vue-next';
 import type { Postit } from '../services/postitApi';
 
+type CardSize = 'small' | 'medium' | 'large';
+
 interface Props {
   postit: Postit;
+  size?: CardSize;
 }
 
 interface Emits {
   (e: 'delete', id: number): void;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  size: 'large',
+});
 defineEmits<Emits>();
 
 // Calcula se o texto da nota é claro ou escuro para melhor contraste
@@ -31,6 +36,7 @@ const textColor = computed(() => {
 <template>
   <div
     class="postit-card"
+    :class="`size-${size}`"
     :style="{
       backgroundColor: postit.color,
       color: textColor,
@@ -59,6 +65,37 @@ const textColor = computed(() => {
 </template>
 
 <style scoped>
+/* Tamanhos */
+.postit-card.size-small {
+  min-height: 130px;
+  max-height: 180px;
+  padding: 1.25rem 1rem 0.75rem;
+}
+
+.postit-card.size-medium {
+  min-height: 190px;
+  max-height: 260px;
+  padding: 1.5rem 1.25rem 1rem;
+}
+
+.postit-card.size-large {
+  min-height: 260px;
+  max-height: 360px;
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.postit-card.size-small .postit-text {
+  font-size: 0.9rem;
+}
+
+.postit-card.size-medium .postit-text {
+  font-size: 1.1rem;
+}
+
+.postit-card.size-large .postit-text {
+  font-size: 1.4rem;
+}
+
 .postit-card {
   min-height: 260px;
   max-height: 360px;

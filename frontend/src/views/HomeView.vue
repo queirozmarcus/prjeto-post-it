@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { StickyNote, Sparkles, AlertCircle, LogOut } from 'lucide-vue-next'
 import PostitForm from '@/components/PostitForm.vue'
@@ -8,10 +8,20 @@ import { usePostits } from '@/composables/usePostits'
 import { useAuth } from '@/composables/useAuth'
 import type { PostitRequest } from '@/services/postitApi'
 
+type CardSize = 'small' | 'medium' | 'large'
+
 const router = useRouter()
 const auth = useAuth()
 const { postits, isLoading, error, isCreating, fetchPostits, createPostit, deletePostit } =
   usePostits()
+
+const cardSize = ref<CardSize>('large')
+
+const sizeOptions: { value: CardSize; label: string; title: string }[] = [
+  { value: 'small', label: 'P', title: 'Notas pequenas' },
+  { value: 'medium', label: 'M', title: 'Notas médias' },
+  { value: 'large', label: 'G', title: 'Notas grandes' },
+]
 
 onMounted(async () => {
   await fetchPostits()
@@ -78,8 +88,30 @@ const handleLogout = async () => {
         <!-- Formulário para criar nota -->
         <PostitForm @submit="handleCreatePostit" @loading="(val: boolean) => (isCreating = val)" />
 
+        <!-- Controle de tamanho das notas -->
+        <div class="size-controls">
+          <span class="size-label">Tamanho:</span>
+          <div class="size-buttons">
+            <button
+              v-for="opt in sizeOptions"
+              :key="opt.value"
+              class="btn-size"
+              :class="{ active: cardSize === opt.value }"
+              :title="opt.title"
+              @click="cardSize = opt.value"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
+
         <!-- Grid de notas -->
-        <PostitGrid :postits="postits" :isLoading="isLoading" @delete="handleDeletePostit" />
+        <PostitGrid
+          :postits="postits"
+          :isLoading="isLoading"
+          :cardSize="cardSize"
+          @delete="handleDeletePostit"
+        />
       </main>
 
       <!-- Footer -->
@@ -249,6 +281,58 @@ const handleLogout = async () => {
 /* Main content */
 .app-main {
   animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Controle de tamanho das notas */
+.size-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.size-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.size-buttons {
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.25rem;
+}
+
+.btn-size {
+  background: transparent;
+  border: none;
+  color: var(--text-dim, #94a3b8);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-size:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main, #f8fafc);
+}
+
+.btn-size.active {
+  background: var(--primary, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 @keyframes fadeIn {
