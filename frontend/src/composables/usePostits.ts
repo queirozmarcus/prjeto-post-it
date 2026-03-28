@@ -83,8 +83,12 @@ export function usePostits(): UsePostitsReturn {
       postits.value = postits.value.filter((p) => p.id !== id);
 
       return true;
-    } catch (err) {
-      error.value = `Falha ao excluir nota ${id}. Tente novamente.`;
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        error.value = 'Você não tem permissão para excluir este post-it.';
+      } else {
+        error.value = 'Falha ao excluir nota. Tente novamente.';
+      }
       console.error(`Erro ao deletar postit ${id}:`, err);
       return false;
     } finally {
@@ -108,8 +112,12 @@ export function usePostits(): UsePostitsReturn {
       }
 
       return updatedPostit;
-    } catch (err) {
-      error.value = `Falha ao atualizar nota ${id}. Tente novamente.`;
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        error.value = 'Você não tem permissão para modificar este post-it.';
+      } else {
+        error.value = 'Falha ao atualizar nota. Tente novamente.';
+      }
       console.error(`Erro ao atualizar postit ${id}:`, err);
       return null;
     }

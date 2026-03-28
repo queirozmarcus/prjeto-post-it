@@ -1,15 +1,16 @@
+# Requer arquivo .env — veja .env.example
 services:
   db:
     image: postgres:16-alpine
     container_name: postit-db
     environment:
-      POSTGRES_DB: postit_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d postit_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -27,12 +28,13 @@ services:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postit_db
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SPRING_FLYWAY_URL: jdbc:postgresql://db:5432/postit_db
-      SPRING_FLYWAY_USER: user
-      SPRING_FLYWAY_PASSWORD: password
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_FLYWAY_URL: ${SPRING_FLYWAY_URL}
+      SPRING_FLYWAY_USER: ${SPRING_FLYWAY_USER}
+      SPRING_FLYWAY_PASSWORD: ${SPRING_FLYWAY_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8080:8080"
     healthcheck:

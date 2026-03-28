@@ -40,11 +40,19 @@ public class PostitPersistenceAdapter implements PostitRepositoryPort {
         repository.deleteById(id);
     }
 
+    @Override
+    public List<Postit> findAllByUserId(Long userId) {
+        return repository.findByUserId(userId).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
     private PostitEntity toEntity(Postit domain) {
         return new PostitEntity(
                 domain.id(),
                 domain.content(),
                 domain.color(),
+                domain.userId(),
                 domain.createdAt(),
                 domain.updatedAt()
         );
@@ -55,6 +63,7 @@ public class PostitPersistenceAdapter implements PostitRepositoryPort {
                 entity.getId(),
                 entity.getContent(),
                 entity.getColor(),
+                entity.getUserId(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

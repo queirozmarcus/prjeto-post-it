@@ -12,13 +12,13 @@ interface Emits {
   (e: 'delete', id: number): void;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   isLoading: false,
 });
 
 defineEmits<Emits>();
 
-const isEmpty = computed((props: Props) => props.postits.length === 0);
+const isEmpty = computed(() => props.postits.length === 0);
 </script>
 
 <template>

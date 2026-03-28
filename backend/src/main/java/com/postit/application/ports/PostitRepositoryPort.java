@@ -9,4 +9,5 @@ public interface PostitRepositoryPort {
     List<Postit> findAll();
     Optional<Postit> findById(Long id);
     void deleteById(Long id);
+    List<Postit> findAllByUserId(Long userId);
 }

@@ -8,7 +8,7 @@ interface Emits {
   (e: 'loading', isLoading: boolean): void;
 }
 
-defineEmits<Emits>();
+const emit = defineEmits<Emits>();
 
 const content = ref('');
 const color = ref('#fef68a'); // Amarelo post-it clássico pastel
@@ -52,7 +52,7 @@ const handleSubmit = async () => {
     };
 
     // Emite evento para parent com o payload
-    defineEmits<Emits>()[1]('submit', payload);
+    emit('submit', payload);
 
     // Limpa form após sucesso (parent é responsável pela lógica)
     // Este delay garante que o parent processa primeiro

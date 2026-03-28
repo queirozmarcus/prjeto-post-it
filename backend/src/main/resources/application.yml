@@ -11,7 +11,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false  # SEC-012: desabilitado para evitar vazamento de queries SQL em produção
     properties:
       hibernate:
         format_sql: true
@@ -24,11 +24,17 @@ spring:
     user: ${SPRING_FLYWAY_USER:user}
     password: ${SPRING_FLYWAY_PASSWORD:password}
 
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:dev-only-secret-not-for-production-use-replace-me}
+    jwt-expiration-ms: 3600000  # 1 hora
+    cookie-secure: ${COOKIE_SECURE:false}  # SEC-006: false em dev, true em produção HTTPS
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health  # SEC-005: removido 'info' — expõe apenas health
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized  # SEC-005: detalhes somente para usuários autenticados

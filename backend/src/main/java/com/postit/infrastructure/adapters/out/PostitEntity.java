@@ -17,6 +17,9 @@ public class PostitEntity {
     @Column(length = 7)
     private String color;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -26,10 +29,11 @@ public class PostitEntity {
     public PostitEntity() {
     }
 
-    public PostitEntity(Long id, String content, String color, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public PostitEntity(Long id, String content, String color, Long userId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.content = content;
         this.color = color;
+        this.userId = userId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -54,6 +58,9 @@ public class PostitEntity {
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

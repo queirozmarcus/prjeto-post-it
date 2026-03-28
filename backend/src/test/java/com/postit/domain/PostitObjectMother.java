@@ -5,11 +5,19 @@ import java.time.LocalDateTime;
 public class PostitObjectMother {
 
     public static Postit validPostit() {
-        return new Postit(1L, "Lembrar de comprar leite", "#FF0000", LocalDateTime.now(), LocalDateTime.now());
+        return new Postit(1L, "Lembrar de comprar leite", "#FF0000", 1L, LocalDateTime.now(), LocalDateTime.now());
+    }
+
+    public static Postit validPostitWithUserId(Long userId) {
+        return new Postit(1L, "Lembrar de comprar leite", "#FF0000", userId, LocalDateTime.now(), LocalDateTime.now());
     }
 
     public static Postit postitToCreate() {
         return Postit.create("Comprar café", "#00FF00");
+    }
+
+    public static Postit postitToCreateWithUserId(Long userId) {
+        return Postit.create("Comprar café", "#00FF00", userId);
     }
 
     public static Postit postitWithInvalidColor() {

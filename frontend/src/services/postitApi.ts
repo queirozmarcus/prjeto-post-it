@@ -20,24 +20,34 @@ class PostitApiService {
     this.api = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
       timeout: 5000,
+      withCredentials: true, // Envia cookie httpOnly nas requests cross-origin
       headers: {
         'Content-Type': 'application/json',
       },
     });
 
-    // Interceptor para logs em desenvolvimento
-    if (import.meta.env.DEV) {
-      this.api.interceptors.response.use(
-        (response) => {
+    // Interceptor de resposta: trata 401 com redirect e loga erros em DEV
+    this.api.interceptors.response.use(
+      (response) => {
+        if (import.meta.env.DEV) {
           console.debug('[API] Success:', response.config.method?.toUpperCase(), response.config.url);
-          return response;
-        },
-        (error) => {
-          console.error('[API] Error:', error.config?.method?.toUpperCase(), error.config?.url, error.response?.status);
-          return Promise.reject(error);
         }
-      );
-    }
+        return response;
+      },
+      (error) => {
+        if (import.meta.env.DEV) {
+          console.error('[API] Error:', error.config?.method?.toUpperCase(), error.config?.url, error.response?.status);
+        }
+        if (error.response?.status === 401) {
+          window.location.href = '/login';
+        }
+        if (error.response?.status === 403) {
+          // Acesso negado — não redireciona; o componente/composable trata a mensagem
+          console.warn('[API] Acesso negado:', error.config?.url);
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
   /**

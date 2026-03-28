@@ -11,7 +11,7 @@ interface Emits {
   (e: 'delete', id: number): void;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 defineEmits<Emits>();
 
 // Calcula se o texto da nota é claro ou escuro para melhor contraste
@@ -26,8 +26,6 @@ const textColor = computed(() => {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.5 ? '#1e293b' : '#ffffff';
 });
-
-const props = defineProps<Props>();
 </script>
 
 <template>
