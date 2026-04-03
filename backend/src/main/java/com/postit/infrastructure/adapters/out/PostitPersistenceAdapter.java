@@ -1,7 +1,12 @@
 package com.postit.infrastructure.adapters.out;
 
+import com.postit.application.ports.PageQuery;
+import com.postit.application.ports.PageResult;
 import com.postit.application.ports.PostitRepositoryPort;
 import com.postit.domain.Postit;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +50,37 @@ public class PostitPersistenceAdapter implements PostitRepositoryPort {
         return repository.findByUserId(userId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageResult<Postit> findAllByUserId(Long userId, PageQuery pageQuery) {
+        Sort sort = Sort.by(
+            Sort.Direction.fromString(pageQuery.sortDirection()),
+            mapSortField(pageQuery.sortField())
+        );
+        PageRequest pageable = PageRequest.of(pageQuery.page(), pageQuery.size(), sort);
+        Page<PostitEntity> page = repository.findByUserId(userId, pageable);
+
+        List<Postit> content = page.getContent().stream()
+                .map(this::toDomain)
+                .toList();
+
+        return new PageResult<>(
+            content,
+            page.getNumber(),
+            page.getSize(),
+            page.getTotalElements(),
+            page.getTotalPages()
+        );
+    }
+
+    private String mapSortField(String field) {
+        return switch (field) {
+            case "createdAt" -> "createdAt";
+            case "updatedAt" -> "updatedAt";
+            case "color" -> "color";
+            default -> "createdAt";
+        };
     }
 
     private PostitEntity toEntity(Postit domain) {

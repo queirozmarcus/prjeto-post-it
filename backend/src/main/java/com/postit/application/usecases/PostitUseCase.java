@@ -1,5 +1,7 @@
 package com.postit.application.usecases;
 
+import com.postit.application.ports.PageQuery;
+import com.postit.application.ports.PageResult;
 import com.postit.application.ports.PostitRepositoryPort;
 import com.postit.application.ports.PostitServicePort;
 import com.postit.application.ports.UserRepositoryPort;
@@ -33,6 +35,11 @@ public class PostitUseCase implements PostitServicePort {
     @Override
     public List<Postit> findAllByUser(Long userId) {
         return repository.findAllByUserId(userId);
+    }
+
+    @Override
+    public PageResult<Postit> findAllByUser(Long userId, PageQuery pageQuery) {
+        return repository.findAllByUserId(userId, pageQuery);
     }
 
     @Override

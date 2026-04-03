@@ -11,6 +11,7 @@ public interface PostitServicePort {
     Postit create(Postit postit, Long userId);
 
     List<Postit> findAllByUser(Long userId);
+    PageResult<Postit> findAllByUser(Long userId, PageQuery pageQuery);
 
     Optional<Postit> findById(Long id, Long userId);
 

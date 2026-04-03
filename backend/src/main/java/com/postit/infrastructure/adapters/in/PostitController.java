@@ -1,5 +1,7 @@
 package com.postit.infrastructure.adapters.in;
 
+import com.postit.application.ports.PageQuery;
+import com.postit.application.ports.PageResult;
 import com.postit.application.ports.PostitServicePort;
 import com.postit.application.ports.UserRepositoryPort;
 import com.postit.domain.Postit;
@@ -38,11 +40,20 @@ public class PostitController {
     }
 
     @GetMapping
-    public List<PostitResponse> findAll(Authentication authentication) {
+    public PagedPostitResponse findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+            Authentication authentication) {
         Long userId = getUserId(authentication);
-        return service.findAllByUser(userId).stream()
-                .map(PostitResponse::fromDomain)
-                .toList();
+
+        String[] sortParts = sort.split(",");
+        String sortField = sortParts[0];
+        String sortDirection = sortParts.length > 1 ? sortParts[1] : "desc";
+
+        PageQuery pageQuery = new PageQuery(page, size, sortField, sortDirection);
+        PageResult<Postit> result = service.findAllByUser(userId, pageQuery);
+        return PagedPostitResponse.fromPageResult(result);
     }
 
     @GetMapping("/{id}")

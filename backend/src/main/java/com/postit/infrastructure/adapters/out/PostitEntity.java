@@ -14,10 +14,10 @@ public class PostitEntity {
     @Column(nullable = false)
     private String content;
 
-    @Column(length = 7)
+    @Column(length = 7, nullable = false)
     private String color;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
     @Column(name = "created_at", updatable = false)
