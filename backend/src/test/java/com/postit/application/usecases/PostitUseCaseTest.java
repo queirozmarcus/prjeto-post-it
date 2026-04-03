@@ -13,12 +13,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.postit.application.ports.PageQuery;
+import com.postit.application.ports.PageResult;
+
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -178,5 +182,45 @@ class PostitUseCaseTest {
                 .isInstanceOf(PostitNotFoundException.class);
 
         verify(repository, never()).deleteById(any());
+    }
+
+    // --- Testes de paginação (Sprint 6) ---
+
+    @Test
+    @DisplayName("Deve retornar página de postits do usuário autenticado")
+    void shouldReturnPaginatedPostitsForUser() {
+        // Given
+        PageQuery pageQuery = PageQuery.ofDefaults();
+        List<Postit> items = List.of(PostitObjectMother.validPostit());
+        PageResult<Postit> expectedPage = new PageResult<>(items, 0, 20, 1L, 1);
+        when(repository.findAllByUserId(USER_ID, pageQuery)).thenReturn(expectedPage);
+
+        // When
+        PageResult<Postit> result = useCase.findAllByUser(USER_ID, pageQuery);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.page()).isZero();
+        assertThat(result.size()).isEqualTo(20);
+        assertThat(result.totalElements()).isEqualTo(1L);
+        assertThat(result.totalPages()).isEqualTo(1);
+        verify(repository, times(1)).findAllByUserId(USER_ID, pageQuery);
+    }
+
+    @Test
+    @DisplayName("Deve repassar o PageQuery exato ao repositório sem modificação")
+    void shouldPassPageQueryToRepository() {
+        // Given
+        PageQuery pageQuery = new PageQuery(2, 5, "content", "asc");
+        PageResult<Postit> emptyPage = new PageResult<>(List.of(), 2, 5, 0L, 0);
+        when(repository.findAllByUserId(eq(USER_ID), eq(pageQuery))).thenReturn(emptyPage);
+
+        // When
+        useCase.findAllByUser(USER_ID, pageQuery);
+
+        // Then
+        verify(repository).findAllByUserId(eq(USER_ID), eq(pageQuery));
+        verifyNoMoreInteractions(repository);
     }
 }

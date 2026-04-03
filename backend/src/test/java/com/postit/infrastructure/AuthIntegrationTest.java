@@ -142,7 +142,9 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/postits")
                         .cookie(new jakarta.servlet.http.Cookie("jwt", jwtCookie)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].content").value("Meu primeiro post-it"));
+                .andExpect(jsonPath("$.content[0].content").value("Meu primeiro post-it"))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -170,8 +172,9 @@ class AuthIntegrationTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/postits")
                         .cookie(new jakarta.servlet.http.Cookie("jwt", jwtCookieB)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$").isEmpty());
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0));
     }
 
     @Test
