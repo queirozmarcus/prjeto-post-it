@@ -14,6 +14,9 @@ public record Postit(
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("O conteúdo do Post-it não pode ser vazio.");
         }
+        if (content.length() > 120) {
+            throw new IllegalArgumentException("O conteúdo deve ter entre 1 e 120 caracteres.");
+        }
         if (color != null && !color.matches("^#[0-9A-Fa-f]{6}$")) {
             throw new IllegalArgumentException("A cor deve ser um código hexadecimal válido (ex: #FFFFFF).");
         }

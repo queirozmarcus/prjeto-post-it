@@ -29,7 +29,7 @@ const colorPresets = [
 
 const contentLength = computed(() => content.value.length);
 const isContentValid = computed(() => content.value.trim().length > 0);
-const charLimit = 500;
+const charLimit = 120;
 
 const handleSubmit = async () => {
   if (!isContentValid.value) {
@@ -130,7 +130,7 @@ const resetForm = () => {
     ></textarea>
 
     <!-- Contador de caracteres -->
-    <div class="char-counter" :class="{ warning: contentLength > charLimit * 0.9 }">
+    <div class="char-counter" :class="{ warning: contentLength >= 100 }">
       {{ contentLength }} / {{ charLimit }}
     </div>
 

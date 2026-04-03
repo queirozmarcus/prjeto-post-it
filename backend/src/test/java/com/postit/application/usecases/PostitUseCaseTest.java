@@ -223,4 +223,33 @@ class PostitUseCaseTest {
         verify(repository).findAllByUserId(eq(USER_ID), eq(pageQuery));
         verifyNoMoreInteractions(repository);
     }
+
+    @Test
+    @DisplayName("Deve rejeitar post-it com conteúdo maior que 120 caracteres")
+    void shouldRejectPostitWithContentExceeding120Chars() {
+        // Given: content com 121 caracteres
+        String longContent = "a".repeat(121);
+
+        // When/Then: validação falha no construtor do domain record
+        assertThatThrownBy(() -> Postit.create(longContent, "#FFFFFF"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("120 caracteres");
+    }
+
+    @Test
+    @DisplayName("Deve aceitar post-it com exatamente 120 caracteres")
+    void shouldAcceptPostitWithExactly120Chars() {
+        // Given: content com 120 caracteres
+        String maxContent = "a".repeat(120);
+        Postit postit = Postit.create(maxContent, "#FFFFFF");
+        when(repository.save(any(Postit.class))).thenReturn(postit.withId(1L));
+
+        // When
+        Postit result = useCase.create(postit);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.content()).hasSize(120);
+        verify(repository, times(1)).save(any(Postit.class));
+    }
 }
