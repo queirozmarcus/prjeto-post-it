@@ -8,7 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-### Full System (Docker Compose)
+### Development Workflows
+
+**Scenario 1: Full Stack on Docker** (slower, isolated, production-like)
 ```bash
 docker compose up -d                         # Start all services (db → api → frontend)
 docker compose down                          # Stop
@@ -17,6 +19,24 @@ docker logs postit-api                       # Check Flyway migrations + startup
 ```
 
 **Services:** API → http://localhost:8080 | Swagger → http://localhost:8080/swagger-ui.html | Frontend → http://localhost:3000
+
+**Scenario 2: API on Docker + Frontend Local** (recommended, fast hot reload)
+```bash
+# Terminal 1: Start API + Database
+docker compose up -d db api
+
+# Terminal 2: Start frontend with hot reload
+cd frontend
+npm install                                  # First time only
+npm run dev                                  # → http://localhost:5173
+```
+
+**Services:** API → http://localhost:8080 | Swagger → http://localhost:8080/swagger-ui.html | Frontend → http://localhost:5173 (or next available port if 5173 is taken)
+
+**Frontend Configuration:**
+- Local dev: create `frontend/.env` with `VITE_API_BASE_URL=http://localhost:8080/api/v1`
+- Docker: env var injected automatically via `docker-compose.yml`
+- File is already in `.gitignore` — safe to create locally
 
 ### Backend (Java / Maven)
 ```bash
@@ -109,3 +129,15 @@ Current: `V1__create_postit_table.sql` (schema + `idx_postits_color` index).
 - **Color field** accepts hex format only (`#RRGGBB`), default `#FFFFFF` — validated in domain
 - **Frontend API base URL** configurable via `VITE_API_BASE_URL` env var (useful for Docker vs local dev)
 - **Bootstrap scripts** (`bootstrap*.py`, `*.sh` in root) are project scaffolding artifacts — ignore them
+
+## Troubleshooting
+
+**Port conflicts:**
+- If Vite fails to start on 5173, it auto-selects next available port (usually 5174, 5175, etc.)
+- If Docker frontend is running on port 3000, Vite will skip it
+- Check `docker ps` to see which ports are in use
+
+**API returns 401 on healthcheck:**
+- `/actuator/health/liveness` requires authentication
+- Use `/actuator/health` for unauthenticated health status
+- Docker compose healthcheck uses `wget` with `/actuator/health/liveness` — may need auth bypass config

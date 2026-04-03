@@ -56,3 +56,5 @@ management:
   endpoint:
     health:
       show-details: when_authorized  # SEC-005: detalhes somente para usuários autenticados
+      probes:
+        enabled: true  # Habilita /actuator/health/liveness e /readiness para K8s/Docker
