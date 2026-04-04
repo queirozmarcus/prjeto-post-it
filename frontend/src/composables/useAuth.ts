@@ -6,6 +6,12 @@ interface AuthUser {
   name: string
 }
 
+interface AuthApiResponse {
+  email: string
+  name: string
+  token?: string | null
+}
+
 interface ProblemDetail {
   status?: number
   detail?: string
@@ -16,12 +22,23 @@ interface ProblemDetail {
 const user = ref<AuthUser | null>(null)
 const isLoggedIn = ref(false)
 
+const JWT_STORAGE_KEY = 'jwt'
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
-  withCredentials: true, // Envia cookie httpOnly nas requests cross-origin
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  withCredentials: true, // Mantém cookie httpOnly como fallback
   headers: {
     'Content-Type': 'application/json',
   },
+})
+
+// Injeta Bearer token em todas as requests quando disponível no localStorage
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem(JWT_STORAGE_KEY)
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 function extractErrorMessage(error: unknown): string {
@@ -67,7 +84,10 @@ export function useAuth() {
    */
   async function login(email: string, password: string): Promise<void> {
     try {
-      await api.post('/auth/login', { email, password })
+      const response = await api.post<AuthApiResponse>('/auth/login', { email, password })
+      if (response.data.token) {
+        localStorage.setItem(JWT_STORAGE_KEY, response.data.token)
+      }
       await checkAuth()
     } catch (error) {
       throw new Error(extractErrorMessage(error))
@@ -80,7 +100,10 @@ export function useAuth() {
    */
   async function register(email: string, password: string, name: string): Promise<void> {
     try {
-      await api.post('/auth/register', { email, password, name })
+      const response = await api.post<AuthApiResponse>('/auth/register', { email, password, name })
+      if (response.data.token) {
+        localStorage.setItem(JWT_STORAGE_KEY, response.data.token)
+      }
       await checkAuth()
     } catch (error) {
       throw new Error(extractErrorMessage(error))
@@ -96,6 +119,7 @@ export function useAuth() {
     } catch {
       // Ignora erros de rede — o estado local é sempre limpo
     } finally {
+      localStorage.removeItem(JWT_STORAGE_KEY)
       user.value = null
       isLoggedIn.value = false
     }

@@ -40,6 +40,6 @@ public class RegisterUseCase {
         User saved = userRepository.save(user);
 
         log.info("AUTH_REGISTER_SUCCESS email={}", saved.email());
-        return new AuthResponse(saved.email(), saved.name());
+        return new AuthResponse(saved.email(), saved.name(), null);
     }
 }

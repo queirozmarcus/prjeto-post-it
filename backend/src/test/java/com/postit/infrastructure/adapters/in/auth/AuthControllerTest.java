@@ -76,7 +76,7 @@ class AuthControllerTest {
     void shouldRegisterAndReturnCookie() throws Exception {
         // Given — senha atende à política SEC-015: maiúscula + minúscula + dígito
         RegisterRequest request = new RegisterRequest("joao@example.com", "Senha123", "Joao Silva");
-        AuthResponse authResponse = new AuthResponse("joao@example.com", "Joao Silva");
+        AuthResponse authResponse = new AuthResponse("joao@example.com", "Joao Silva", null);
 
         // SEC-004: register agora aplica rate limit
         when(rateLimiterService.tryConsume(anyString())).thenReturn(true);
@@ -99,7 +99,7 @@ class AuthControllerTest {
     void shouldLoginAndReturnCookie() throws Exception {
         // Given
         LoginRequest request = new LoginRequest("joao@example.com", "Senha123");
-        AuthResponse authResponse = new AuthResponse("joao@example.com", "Joao Silva");
+        AuthResponse authResponse = new AuthResponse("joao@example.com", "Joao Silva", "mocked-jwt-token");
 
         when(rateLimiterService.tryConsume(anyString())).thenReturn(true);
         when(loginUseCase.login(any(LoginRequest.class))).thenReturn("mocked-jwt-token");
@@ -151,7 +151,7 @@ class AuthControllerTest {
     void shouldReturn429WhenRateLimitExceeded() throws Exception {
         // Given — as primeiras 5 chamadas são permitidas, a 6ª é bloqueada
         LoginRequest request = new LoginRequest("joao@example.com", "senha123");
-        AuthResponse authResponse = new AuthResponse("joao@example.com", "Joao Silva");
+        AuthResponse authResponse = new AuthResponse("joao@example.com", "Joao Silva", null);
 
         when(rateLimiterService.tryConsume(anyString()))
                 .thenReturn(true)   // 1ª

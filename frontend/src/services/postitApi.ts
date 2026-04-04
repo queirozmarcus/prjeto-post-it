@@ -13,17 +13,34 @@ export interface PostitRequest {
   color: string;
 }
 
+export interface PagedPostitResponse {
+  content: Postit[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 class PostitApiService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
+      baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
       timeout: 5000,
       withCredentials: true, // Envia cookie httpOnly nas requests cross-origin
       headers: {
         'Content-Type': 'application/json',
       },
+    });
+
+    // Interceptor de request: injeta Bearer token do localStorage quando disponível
+    this.api.interceptors.request.use((config) => {
+      const token = localStorage.getItem('jwt');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
     });
 
     // Interceptor de resposta: trata 401 com redirect e loga erros em DEV
@@ -51,12 +68,12 @@ class PostitApiService {
   }
 
   /**
-   * Busca todos os post-its
+   * Busca todos os post-its (resposta paginada — extrai o array de content)
    */
   async getAllPostits(): Promise<Postit[]> {
     try {
-      const response = await this.api.get<Postit[]>('/postits');
-      return response.data;
+      const response = await this.api.get<PagedPostitResponse>('/postits');
+      return response.data.content;
     } catch (error) {
       console.error('Erro ao buscar post-its:', error);
       throw error;

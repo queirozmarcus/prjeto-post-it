@@ -38,6 +38,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = extractTokenFromCookies(request);
 
+        // Fallback: Authorization: Bearer <token> — usado por SPAs quando cookie não é enviado
+        if (token == null || token.isBlank()) {
+            token = extractTokenFromHeader(request);
+        }
+
         if (token == null || token.isBlank()) {
             filterChain.doFilter(request, response);
             return;
@@ -62,6 +67,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private String extractTokenFromHeader(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
     }
 
     private String extractTokenFromCookies(HttpServletRequest request) {

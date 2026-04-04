@@ -66,12 +66,12 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(pd);
         }
 
-        AuthResponse authResponse = registerUseCase.register(request);
-
-        // Gerar token para o usuário recém-registrado
+        // Registrar e depois autenticar para obter o token
+        registerUseCase.register(request);
         String token = loginUseCase.login(new LoginRequest(request.email(), request.password()));
         setJwtCookie(response, token);
 
+        AuthResponse authResponse = loginUseCase.findAuthResponse(token);
         return ResponseEntity.status(HttpStatus.CREATED).body(authResponse);
     }
 
@@ -109,7 +109,7 @@ public class AuthController {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .map(user -> ResponseEntity.ok(new AuthResponse(user.email(), user.name())))
+                .map(user -> ResponseEntity.ok(new AuthResponse(user.email(), user.name(), null)))
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 

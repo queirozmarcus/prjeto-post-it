@@ -3,12 +3,12 @@ import { ref, computed } from 'vue';
 import { PlusCircle, AlertCircle } from 'lucide-vue-next';
 import type { PostitRequest } from '../services/postitApi';
 
-interface Emits {
-  (e: 'submit', payload: PostitRequest): void;
-  (e: 'loading', isLoading: boolean): void;
+interface Props {
+  // Função async que executa a criação — retorna true em sucesso, false em falha
+  onSubmit: (payload: PostitRequest) => Promise<boolean>;
 }
 
-const emit = defineEmits<Emits>();
+const props = defineProps<Props>();
 
 const content = ref('');
 const color = ref('#fef68a'); // Amarelo post-it clássico pastel
@@ -42,28 +42,25 @@ const handleSubmit = async () => {
     return;
   }
 
-  try {
-    isLoading.value = true;
-    error.value = '';
+  isLoading.value = true;
+  error.value = '';
 
-    const payload: PostitRequest = {
-      content: content.value.trim(),
-      color: color.value,
-    };
+  const payload: PostitRequest = {
+    content: content.value.trim(),
+    color: color.value,
+  };
 
-    // Emite evento para parent com o payload
-    emit('submit', payload);
+  // Aguarda o resultado real da operação para saber se deve limpar o form
+  const success = await props.onSubmit(payload);
 
-    // Limpa form após sucesso (parent é responsável pela lógica)
-    // Este delay garante que o parent processa primeiro
-    setTimeout(() => {
-      content.value = '';
-      color.value = '#fef68a';
-      isLoading.value = false;
-    }, 100);
-  } catch (err) {
-    error.value = 'Erro ao criar nota. Tente novamente.';
-    isLoading.value = false;
+  isLoading.value = false;
+
+  if (success) {
+    content.value = '';
+    color.value = '#fef68a';
+  } else {
+    // Mantém o conteúdo para o usuário poder corrigir e retentar
+    error.value = 'Erro ao criar nota. Verifique sua conexão e tente novamente.';
   }
 };
 

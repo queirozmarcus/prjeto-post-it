@@ -21,11 +21,12 @@ npm install                                  # First time only
 npm run dev                                  # → http://localhost:5173
 ```
 
-**Services:** API → http://localhost:8080 | Swagger → http://localhost:8080/swagger-ui.html | Frontend → http://localhost:5173 (or next available port if 5173 is taken)
+**Services:** API → http://localhost:8080 | Swagger → http://localhost:8080/swagger-ui.html | Frontend → http://localhost:3000
 
 **Frontend Configuration:**
-- Create `frontend/.env` with `VITE_API_BASE_URL=http://localhost:8080/api/v1`
+- Create `frontend/.env` with `VITE_API_BASE_URL=/api/v1` (relative path — required)
 - File is already in `.gitignore` — safe to create locally
+- **IMPORTANT:** Do NOT use `http://localhost:8080/api/v1` as the URL. The cookie is `SameSite=Lax`; cross-origin POST requests (different port) will not send the cookie, causing silent 401 and "connection error" in the UI. The Vite proxy (`/api/* → http://localhost:8080`) keeps requests same-origin.
 
 **Useful Commands:**
 ```bash

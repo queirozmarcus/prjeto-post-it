@@ -12,7 +12,7 @@ type CardSize = 'small' | 'medium' | 'large'
 
 const router = useRouter()
 const auth = useAuth()
-const { postits, isLoading, error, isCreating, fetchPostits, createPostit, deletePostit } =
+const { postits, isLoading, error, fetchPostits, createPostit, deletePostit } =
   usePostits()
 
 const cardSize = ref<CardSize>('large')
@@ -27,8 +27,10 @@ onMounted(async () => {
   await fetchPostits()
 })
 
-const handleCreatePostit = async (request: PostitRequest) => {
-  await createPostit(request)
+// Retorna true em sucesso para que o PostitForm saiba se deve limpar o campo
+const handleCreatePostit = async (request: PostitRequest): Promise<boolean> => {
+  const result = await createPostit(request)
+  return result !== null
 }
 
 const handleDeletePostit = async (id: number) => {
@@ -86,7 +88,7 @@ const handleLogout = async () => {
         </div>
 
         <!-- Formulário para criar nota -->
-        <PostitForm @submit="handleCreatePostit" @loading="(val: boolean) => (isCreating = val)" />
+        <PostitForm :onSubmit="handleCreatePostit" />
 
         <!-- Controle de tamanho das notas -->
         <div class="size-controls">

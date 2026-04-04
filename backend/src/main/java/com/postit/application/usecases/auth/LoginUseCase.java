@@ -53,6 +53,6 @@ public class LoginUseCase {
     public AuthResponse findAuthResponse(String token) {
         String email = jwtService.extractEmail(token);
         String name = jwtService.extractName(token);
-        return new AuthResponse(email, name);
+        return new AuthResponse(email, name, token);
     }
 }

@@ -3,8 +3,13 @@
  * Suporta RFC 9457 (Problem Details) e fallback para mensagens genéricas.
  */
 export function extractErrorMessage(error: any): string {
-  // Erro de rede/timeout sem resposta
+  // Erro sem resposta — pode ser rede/timeout ou request abortada (ex: redirect 401)
   if (!error.response) {
+    // CanceledError é lançado quando a request é cancelada (ex: navegação durante request)
+    if (error.code === 'ERR_CANCELED' || error.name === 'CanceledError') {
+      return 'A operação foi cancelada. Tente novamente.';
+    }
+    // ERR_NETWORK cobre falha de conexão real (backend fora do ar, sem internet)
     return 'Erro de conexão. Verifique sua internet e tente novamente.';
   }
 
