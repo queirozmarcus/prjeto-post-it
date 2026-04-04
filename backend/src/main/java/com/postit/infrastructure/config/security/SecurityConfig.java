@@ -90,6 +90,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/actuator/health",
+                                "/actuator/health/liveness",
+                                "/actuator/health/readiness",
                                 // TODO produção: restringir /swagger-ui/** e /v3/api-docs/** por profile
                                 // Ex: condicional em @Profile("!prod") ou mover para SecurityConfig separado
                                 "/swagger-ui.html",

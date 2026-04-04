@@ -10,20 +10,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Development Workflows
 
-**Scenario 1: Full Stack on Docker** (slower, isolated, production-like)
+**Standard Setup: API + Database on Docker, Frontend Local**
 ```bash
-docker compose up -d                         # Start all services (db → api → frontend)
-docker compose down                          # Stop
-docker compose down -v                       # Stop + delete volumes (data loss)
-docker logs postit-api                       # Check Flyway migrations + startup
-```
-
-**Services:** API → http://localhost:8080 | Swagger → http://localhost:8080/swagger-ui.html | Frontend → http://localhost:3000
-
-**Scenario 2: API on Docker + Frontend Local** (recommended, fast hot reload)
-```bash
-# Terminal 1: Start API + Database
-docker compose up -d db api
+# Terminal 1: Start backend services (database → api)
+docker compose up -d
 
 # Terminal 2: Start frontend with hot reload
 cd frontend
@@ -34,9 +24,18 @@ npm run dev                                  # → http://localhost:5173
 **Services:** API → http://localhost:8080 | Swagger → http://localhost:8080/swagger-ui.html | Frontend → http://localhost:5173 (or next available port if 5173 is taken)
 
 **Frontend Configuration:**
-- Local dev: create `frontend/.env` with `VITE_API_BASE_URL=http://localhost:8080/api/v1`
-- Docker: env var injected automatically via `docker-compose.yml`
+- Create `frontend/.env` with `VITE_API_BASE_URL=http://localhost:8080/api/v1`
 - File is already in `.gitignore` — safe to create locally
+
+**Useful Commands:**
+```bash
+docker compose down                          # Stop services
+docker compose down -v                       # Stop + delete volumes (data loss)
+docker logs postit-api                       # Check Flyway migrations + startup
+docker logs postit-api --follow              # Tail logs in real-time
+docker compose ps                            # List running services
+curl http://localhost:8080/actuator/health   # Check API health
+```
 
 ### Backend (Java / Maven)
 ```bash
@@ -135,8 +134,8 @@ Current: `V1__create_postit_table.sql` (schema + `idx_postits_color` index).
 
 **Port conflicts:**
 - If Vite fails to start on 5173, it auto-selects next available port (usually 5174, 5175, etc.)
-- If Docker frontend is running on port 3000, Vite will skip it
-- Check `docker ps` to see which ports are in use
+- Check `docker ps` to see which ports are in use by containers
+- Backend always on port 8080, database on 5432
 
 **API returns 401 on healthcheck:**
 - `/actuator/health/liveness` requires authentication

@@ -1,5 +1,6 @@
 import { ref, computed, Ref } from 'vue';
 import { postitApi, type Postit, type PostitRequest } from '../services/postitApi';
+import { extractErrorMessage } from '../utils/errorHandler';
 
 export interface UsePostitsReturn {
   postits: Ref<Postit[]>;
@@ -39,7 +40,7 @@ export function usePostits(): UsePostitsReturn {
       error.value = '';
       postits.value = await postitApi.getAllPostits();
     } catch (err) {
-      error.value = 'Falha ao carregar notas. Tente novamente.';
+      error.value = extractErrorMessage(err);
       console.error('Erro ao buscar postits:', err);
     } finally {
       isLoading.value = false;
@@ -61,7 +62,7 @@ export function usePostits(): UsePostitsReturn {
 
       return newPostit;
     } catch (err) {
-      error.value = 'Falha ao criar nota. Tente novamente.';
+      error.value = extractErrorMessage(err);
       console.error('Erro ao criar postit:', err);
       return null;
     } finally {
@@ -83,12 +84,8 @@ export function usePostits(): UsePostitsReturn {
       postits.value = postits.value.filter((p) => p.id !== id);
 
       return true;
-    } catch (err: any) {
-      if (err.response?.status === 403) {
-        error.value = 'Você não tem permissão para excluir este post-it.';
-      } else {
-        error.value = 'Falha ao excluir nota. Tente novamente.';
-      }
+    } catch (err) {
+      error.value = extractErrorMessage(err);
       console.error(`Erro ao deletar postit ${id}:`, err);
       return false;
     } finally {
@@ -112,12 +109,8 @@ export function usePostits(): UsePostitsReturn {
       }
 
       return updatedPostit;
-    } catch (err: any) {
-      if (err.response?.status === 403) {
-        error.value = 'Você não tem permissão para modificar este post-it.';
-      } else {
-        error.value = 'Falha ao atualizar nota. Tente novamente.';
-      }
+    } catch (err) {
+      error.value = extractErrorMessage(err);
       console.error(`Erro ao atualizar postit ${id}:`, err);
       return null;
     }
