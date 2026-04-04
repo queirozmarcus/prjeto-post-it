@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import com.postit.infrastructure.config.security.SecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
@@ -51,24 +51,24 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private RegisterUseCase registerUseCase;
 
-    @MockBean
+    @MockitoBean
     private LoginUseCase loginUseCase;
 
-    @MockBean
+    @MockitoBean
     private RateLimiterService rateLimiterService;
 
-    @MockBean
+    @MockitoBean
     private UserRepositoryPort userRepository;
 
     // Necessário para JwtAuthFilter e SecurityConfig
-    @MockBean
+    @MockitoBean
     private JwtService jwtService;
 
     // Necessário para UserDetailsServiceImpl referenciado pelo SecurityConfig
-    @MockBean
+    @MockitoBean
     private UserDetailsService userDetailsService;
 
     @Test
