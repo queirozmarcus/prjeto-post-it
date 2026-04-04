@@ -1,1 +1,0 @@
-import os; from pathlib import Path; dirs = ['backend/src/main/java/com/postit/domain', 'backend/src/main/java/com/postit/application/ports']; [Path('/home/mq/iGitHub/prjeto-post-it/' + d).mkdir(parents=True, exist_ok=True) for d in dirs]; print('done')

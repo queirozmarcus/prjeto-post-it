@@ -1,1 +1,0 @@
-Bootstrap script will be created in BOOTSTRAP.md file
