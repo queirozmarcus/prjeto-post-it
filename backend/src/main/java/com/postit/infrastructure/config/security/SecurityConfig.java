@@ -71,8 +71,8 @@ public class SecurityConfig {
                         headers.referrerPolicy(referrer ->
                                 referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN));
                         // Permissions-Policy: desabilita features de browser não utilizadas pela aplicação
-                        headers.permissionsPolicy()
-                                .policy("camera=(), microphone=(), geolocation=()");
+                        headers.addHeaderWriter(new StaticHeadersWriter(
+                                "Permissions-Policy", "camera=(), microphone=(), geolocation=()"));
                         // HSTS: força HTTPS por 1 ano incluindo subdomínios
                         headers.httpStrictTransportSecurity(hsts -> hsts
                                 .includeSubDomains(true)
