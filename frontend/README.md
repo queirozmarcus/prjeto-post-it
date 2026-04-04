@@ -106,7 +106,7 @@ Form component for creating new notes.
 
 **Features:**
 - Color picker (native + presets)
-- Character counter (max 500)
+- Character counter (max 120, warning at 100)
 - Keyboard shortcuts (Ctrl+Enter)
 - Form validation
 - Error handling

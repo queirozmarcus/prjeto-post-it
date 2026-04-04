@@ -118,7 +118,7 @@ clearError();
 **Smart form for creating new notes.**
 
 **Features:**
-- 📝 Textarea with character limit (500 chars)
+- 📝 Textarea with character limit (120 chars, warning at 100)
 - 🎨 Native color picker + 8 preset colors
 - ⌨️ Keyboard shortcut: Ctrl+Enter to submit
 - ✅ Form validation (content required)
@@ -503,7 +503,7 @@ frontend/
 ### ✅ UI/UX Features
 - 🎨 Color picker (native + 8 presets)
 - 🎨 Smart text color (auto contrast)
-- 📝 Character counter (500 char limit)
+- 📝 Character counter (120 char limit, warning at 100)
 - ⌨️ Keyboard shortcut (Ctrl+Enter)
 - 🔍 Empty state messaging
 - ⏳ Loading indicators

@@ -8,6 +8,18 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ## [Unreleased]
 
+### Changed (2026-04-03)
+
+#### Limite de Conteúdo Reduzido para Realismo
+- **Limite anterior:** 500 caracteres
+- **Limite novo:** 120 caracteres (~2-3 linhas, como post-it físico real de 3x4 inches)
+- **Backend:** `Postit` domain record atualizado com validação `content.length() <= 120`
+- **Frontend:** `PostitForm.vue` char counter atualizado (warning aos 100 chars, bloqueio aos 120)
+- **Tests:** +2 edge cases (120 aceita, 121 rejeita) → 80 testes passando
+- **Impacto nos dados:** Zero registros afetados (todos os post-its existentes já estavam <= 120 chars)
+- **Motivação:** Post-its físicos reais comportam ~100-150 chars; limite de 500 era irrealista
+- **Commit:** `refactor(domain): reduz limite de conteúdo para 120 caracteres (post-it realista)`
+
 ### Added (2026-04-03)
 
 #### Paginação na API de Post-its
@@ -122,7 +134,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 ### Added
 
 #### Componentes Vue 3
-- **PostitForm.vue:** Formulário de criação com color picker, char counter (500), Ctrl+Enter
+- **PostitForm.vue:** Formulário de criação com color picker, char counter (120, warning 100), Ctrl+Enter
 - **PostitCard.vue:** Display de nota individual com smart text contrast (WCAG AA), delete button
 - **PostitGrid.vue:** Layout responsivo (1-4 colunas), empty state, loading spinner, animations
 
@@ -167,7 +179,7 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 ### Added
 
 #### Backend Hexagonal Architecture
-- **Domain:** `Postit` record com validação de cor hex e content max 500 chars
+- **Domain:** `Postit` record com validação de cor hex e content max 120 chars (atualizado 2026-04-03 para realismo)
 - **Application Ports:** `PostitServicePort`, `PostitRepositoryPort`
 - **Application Use Cases:** `PostitUseCase` (CRUD operations)
 - **Infrastructure Adapters:**

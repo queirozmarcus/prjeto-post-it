@@ -126,6 +126,7 @@ Current: `V1__create_postit_table.sql` (schema + `idx_postits_color` index).
 ## Key Constraints
 
 - **Domain records are immutable** — updates return new instances via `withId()`, never mutate
+- **Content limit** — maximum 120 characters (like a real 3x4 inch post-it note), validated in domain
 - **Color field** accepts hex format only (`#RRGGBB`), default `#FFFFFF` — validated in domain
 - **Frontend API base URL** configurable via `VITE_API_BASE_URL` env var (useful for Docker vs local dev)
 - **Bootstrap scripts** (`bootstrap*.py`, `*.sh` in root) are project scaffolding artifacts — ignore them

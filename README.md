@@ -44,7 +44,7 @@ Sistema de gerenciamento de notas estilo post-it com autenticação, ownership e
 ## ✨ Features
 
 ### Core
-- 📝 **CRUD de notas** — criar, ler, atualizar, deletar
+- 📝 **CRUD de notas** — criar, ler, atualizar, deletar (máx 120 caracteres)
 - 🎨 **Color picker** — 8 presets + seletor nativo
 - 👤 **Autenticação** — registro + login com JWT
 - 🔒 **Isolamento por usuário** — row-level security
@@ -53,6 +53,7 @@ Sistema de gerenciamento de notas estilo post-it com autenticação, ownership e
 ### UX
 - 🎨 Smart text contrast (WCAG AA compliant)
 - ⌨️ Keyboard shortcuts (Ctrl+Enter)
+- 📏 Character counter (warning aos 100, limite 120)
 - 📱 Responsive design (1-4 colunas)
 - ✨ Animações suaves (staggered entry)
 - 🔔 Error alerts com auto-dismiss

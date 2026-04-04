@@ -16,7 +16,7 @@ A **production-ready** Vue 3 frontend with complete CRUD functionality, beautifu
 
 | Component | Purpose | Features |
 |-----------|---------|----------|
-| `PostitForm.vue` | Create notes | Color picker + presets, char counter (500 limit), Ctrl+Enter shortcut, validation |
+| `PostitForm.vue` | Create notes | Color picker + presets, char counter (120 limit, warning at 100), Ctrl+Enter shortcut, validation |
 | `PostitCard.vue` | Display notes | Smart text color, hover animations, delete button, scrollable content |
 | `PostitGrid.vue` | Grid layout | Responsive (1-4 cols), empty state, loading state, staggered animations |
 | `App.vue` | Root orchestrator | Header, error alerts, footer, lifecycle management |
@@ -358,7 +358,7 @@ Implementação completa do frontend Vue 3 + TypeScript com:
 
 Features:
 - Color picker + presets
-- Char counter (500 limit)
+- Char counter (120 limit, warning at 100)
 - Keyboard shortcuts (Ctrl+Enter)
 - Delete com confirmação
 - Empty/loading states
