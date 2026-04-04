@@ -15,7 +15,7 @@ const auth = useAuth()
 const { postits, isLoading, error, fetchPostits, createPostit, deletePostit } =
   usePostits()
 
-const cardSize = ref<CardSize>('large')
+const cardSize = ref<CardSize>('medium')
 
 const sizeOptions: { value: CardSize; label: string; title: string }[] = [
   { value: 'small', label: 'P', title: 'Notas pequenas' },

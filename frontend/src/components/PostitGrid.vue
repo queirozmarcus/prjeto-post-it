@@ -17,7 +17,7 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   isLoading: false,
-  cardSize: 'large',
+  cardSize: 'medium',
 });
 
 defineEmits<Emits>();
@@ -27,8 +27,8 @@ const isEmpty = computed(() => props.postits.length === 0);
 const gridMinWidth = computed(() => {
   const widths: Record<CardSize, string> = {
     small: '140px',
-    medium: '200px',
-    large: '260px',
+    medium: '180px',
+    large: '240px',
   };
   return widths[props.cardSize];
 });
@@ -53,6 +53,7 @@ const gridMinWidth = computed(() => {
     <TransitionGroup
       v-else
       name="list"
+      tag="div"
       class="postit-grid"
       :style="{ '--grid-min-width': gridMinWidth }"
     >
@@ -74,10 +75,10 @@ const gridMinWidth = computed(() => {
 
 .postit-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width, 260px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-min-width, 180px)), 1fr));
   gap: 2rem;
   animation: fadeIn 0.5s ease-in;
-  transition: grid-template-columns 0.3s ease;
+  width: 100%;
 }
 
 @keyframes fadeIn {
@@ -181,14 +182,14 @@ const gridMinWidth = computed(() => {
 /* Responsividade */
 @media (max-width: 768px) {
   .postit-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1.5rem;
   }
 }
 
 @media (max-width: 640px) {
   .postit-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-min-width, 140px)), 1fr));
+    justify-content: center;
     gap: 1rem;
   }
 

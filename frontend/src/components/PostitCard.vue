@@ -15,7 +15,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  size: 'large',
+  size: 'small',
 });
 defineEmits<Emits>();
 
@@ -65,40 +65,50 @@ const textColor = computed(() => {
 </template>
 
 <style scoped>
-/* Tamanhos */
+/* Tamanhos - formato quadrado perfeito */
 .postit-card.size-small {
-  min-height: 130px;
-  max-height: 180px;
-  padding: 1.25rem 1rem 0.75rem;
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  height: 140px;
+  min-height: 140px;
+  max-height: 140px;
+  padding: 0.875rem;
 }
 
 .postit-card.size-medium {
-  min-height: 190px;
-  max-height: 260px;
-  padding: 1.5rem 1.25rem 1rem;
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  height: 180px;
+  min-height: 180px;
+  max-height: 180px;
+  padding: 1.125rem;
 }
 
 .postit-card.size-large {
-  min-height: 260px;
-  max-height: 360px;
-  padding: 2rem 1.5rem 1.5rem;
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  height: 240px;
+  min-height: 240px;
+  max-height: 240px;
+  padding: 1.375rem;
 }
 
 .postit-card.size-small .postit-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .postit-card.size-medium .postit-text {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .postit-card.size-large .postit-text {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
 }
 
 .postit-card {
-  min-height: 260px;
-  max-height: 360px;
   padding: 2rem 1.5rem 1.5rem;
   border-radius: 2px 2px 40px 2px;
   position: relative;
