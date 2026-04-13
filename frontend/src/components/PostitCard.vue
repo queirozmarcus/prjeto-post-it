@@ -3,15 +3,20 @@ import { computed } from 'vue';
 import { Trash2 } from 'lucide-vue-next';
 import type { Postit } from '../services/postitApi';
 
+type CardSize = 'small' | 'medium' | 'large';
+
 interface Props {
   postit: Postit;
+  size?: CardSize;
 }
 
 interface Emits {
   (e: 'delete', id: number): void;
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  size: 'small',
+});
 defineEmits<Emits>();
 
 // Calcula se o texto da nota é claro ou escuro para melhor contraste
@@ -26,13 +31,12 @@ const textColor = computed(() => {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.5 ? '#1e293b' : '#ffffff';
 });
-
-const props = defineProps<Props>();
 </script>
 
 <template>
   <div
     class="postit-card"
+    :class="`size-${size}`"
     :style="{
       backgroundColor: postit.color,
       color: textColor,
@@ -61,9 +65,50 @@ const props = defineProps<Props>();
 </template>
 
 <style scoped>
+/* Tamanhos - formato quadrado perfeito */
+.postit-card.size-small {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+  height: 140px;
+  min-height: 140px;
+  max-height: 140px;
+  padding: 0.875rem;
+}
+
+.postit-card.size-medium {
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  height: 180px;
+  min-height: 180px;
+  max-height: 180px;
+  padding: 1.125rem;
+}
+
+.postit-card.size-large {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  height: 240px;
+  min-height: 240px;
+  max-height: 240px;
+  padding: 1.375rem;
+}
+
+.postit-card.size-small .postit-text {
+  font-size: 0.85rem;
+}
+
+.postit-card.size-medium .postit-text {
+  font-size: 1rem;
+}
+
+.postit-card.size-large .postit-text {
+  font-size: 1.25rem;
+}
+
 .postit-card {
-  min-height: 260px;
-  max-height: 360px;
   padding: 2rem 1.5rem 1.5rem;
   border-radius: 2px 2px 40px 2px;
   position: relative;

@@ -1,5 +1,6 @@
 import { ref, computed, Ref } from 'vue';
 import { postitApi, type Postit, type PostitRequest } from '../services/postitApi';
+import { extractErrorMessage } from '../utils/errorHandler';
 
 export interface UsePostitsReturn {
   postits: Ref<Postit[]>;
@@ -39,7 +40,7 @@ export function usePostits(): UsePostitsReturn {
       error.value = '';
       postits.value = await postitApi.getAllPostits();
     } catch (err) {
-      error.value = 'Falha ao carregar notas. Tente novamente.';
+      error.value = extractErrorMessage(err);
       console.error('Erro ao buscar postits:', err);
     } finally {
       isLoading.value = false;
@@ -61,7 +62,7 @@ export function usePostits(): UsePostitsReturn {
 
       return newPostit;
     } catch (err) {
-      error.value = 'Falha ao criar nota. Tente novamente.';
+      error.value = extractErrorMessage(err);
       console.error('Erro ao criar postit:', err);
       return null;
     } finally {
@@ -84,7 +85,7 @@ export function usePostits(): UsePostitsReturn {
 
       return true;
     } catch (err) {
-      error.value = `Falha ao excluir nota ${id}. Tente novamente.`;
+      error.value = extractErrorMessage(err);
       console.error(`Erro ao deletar postit ${id}:`, err);
       return false;
     } finally {
@@ -109,7 +110,7 @@ export function usePostits(): UsePostitsReturn {
 
       return updatedPostit;
     } catch (err) {
-      error.value = `Falha ao atualizar nota ${id}. Tente novamente.`;
+      error.value = extractErrorMessage(err);
       console.error(`Erro ao atualizar postit ${id}:`, err);
       return null;
     }

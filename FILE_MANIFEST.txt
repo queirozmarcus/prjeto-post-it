@@ -1,4 +1,0 @@
-backend/pom.xml
-backend/Dockerfile
-backend/src/main/resources/application.yml
-backend/src/main/resources/db/migration/V1__create_postit_table.sql

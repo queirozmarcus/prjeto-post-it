@@ -3,22 +3,35 @@ import { computed } from 'vue';
 import PostitCard from './PostitCard.vue';
 import type { Postit } from '../services/postitApi';
 
+type CardSize = 'small' | 'medium' | 'large';
+
 interface Props {
   postits: Postit[];
   isLoading?: boolean;
+  cardSize?: CardSize;
 }
 
 interface Emits {
   (e: 'delete', id: number): void;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   isLoading: false,
+  cardSize: 'medium',
 });
 
 defineEmits<Emits>();
 
-const isEmpty = computed((props: Props) => props.postits.length === 0);
+const isEmpty = computed(() => props.postits.length === 0);
+
+const gridMinWidth = computed(() => {
+  const widths: Record<CardSize, string> = {
+    small: '140px',
+    medium: '180px',
+    large: '240px',
+  };
+  return widths[props.cardSize];
+});
 </script>
 
 <template>
@@ -37,11 +50,18 @@ const isEmpty = computed((props: Props) => props.postits.length === 0);
     </div>
 
     <!-- Grid de notas -->
-    <TransitionGroup v-else name="list" class="postit-grid">
+    <TransitionGroup
+      v-else
+      name="list"
+      tag="div"
+      class="postit-grid"
+      :style="{ '--grid-min-width': gridMinWidth }"
+    >
       <PostitCard
         v-for="postit in postits"
         :key="postit.id"
         :postit="postit"
+        :size="cardSize"
         @delete="$emit('delete', $event)"
       />
     </TransitionGroup>
@@ -55,9 +75,10 @@ const isEmpty = computed((props: Props) => props.postits.length === 0);
 
 .postit-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-min-width, 180px)), 1fr));
   gap: 2rem;
   animation: fadeIn 0.5s ease-in;
+  width: 100%;
 }
 
 @keyframes fadeIn {
@@ -161,14 +182,14 @@ const isEmpty = computed((props: Props) => props.postits.length === 0);
 /* Responsividade */
 @media (max-width: 768px) {
   .postit-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1.5rem;
   }
 }
 
 @media (max-width: 640px) {
   .postit-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-min-width, 140px)), 1fr));
+    justify-content: center;
     gap: 1rem;
   }
 

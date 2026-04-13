@@ -7,15 +7,33 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:user}
     password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      # Pool sizing: (2 * CPU cores) + effective_spindle_count is the rule of thumb.
+      # Starting conservative at 10; tune up only with profiling evidence.
+      maximum-pool-size: 10
+      minimum-idle: 2
+      # Fail fast on startup if the DB is unreachable
+      initialization-fail-timeout: 10000
+      # Connections idle longer than this are retired (< server wait_timeout)
+      idle-timeout: 300000
+      # Hard cap on connection lifetime — prevents stale connections from pool aging
+      max-lifetime: 1800000
+      connection-timeout: 30000
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false  # SEC-012: desabilitado para evitar vazamento de queries SQL em produção
+    open-in-view: false  # Evita lazy loading durante view rendering
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Batch INSERTs/UPDATEs — reduces round-trips when saving multiple entities
+        jdbc.batch_size: 25
+        order_inserts: true
+        order_updates: true
+        # Avoids the Hibernate sequence allocation warning on PostgreSQL with IDENTITY strategy
+        use_get_generated_keys: true
 
   flyway:
     enabled: true
@@ -24,11 +42,19 @@ spring:
     user: ${SPRING_FLYWAY_USER:user}
     password: ${SPRING_FLYWAY_PASSWORD:password}
 
+app:
+  security:
+    jwt-secret: ${JWT_SECRET:dev-only-secret-not-for-production-use-replace-me}
+    jwt-expiration-ms: 3600000  # 1 hora
+    cookie-secure: ${COOKIE_SECURE:false}  # SEC-006: false em dev, true em produção HTTPS
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health  # SEC-005: removido 'info' — expõe apenas health
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized  # SEC-005: detalhes somente para usuários autenticados
+      probes:
+        enabled: true  # Habilita /actuator/health/liveness e /readiness para K8s/Docker

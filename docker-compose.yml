@@ -1,15 +1,17 @@
+# Requer arquivo .env — veja .env.example
 services:
   db:
     image: postgres:16-alpine
     container_name: postit-db
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: postit_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d postit_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -17,44 +19,72 @@ services:
       - postit_data:/var/lib/postgresql/data
     networks:
       - postit-network
+    # Resource limits prevent a runaway db from starving the host.
+    # Adjust based on actual profiling; these are conservative defaults for dev/staging.
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   api:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: postit-api
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postit_db
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
-      SPRING_FLYWAY_URL: jdbc:postgresql://db:5432/postit_db
-      SPRING_FLYWAY_USER: user
-      SPRING_FLYWAY_PASSWORD: password
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_FLYWAY_URL: ${SPRING_FLYWAY_URL}
+      SPRING_FLYWAY_USER: ${SPRING_FLYWAY_USER}
+      SPRING_FLYWAY_PASSWORD: ${SPRING_FLYWAY_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8080:8080"
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1"]
+      # /actuator/health/liveness only checks that the JVM is alive (not DB, not downstream).
+      # Using /liveness here prevents a degraded dependency from making compose think the app is dead.
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8080/actuator/health/liveness || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
     networks:
       - postit-network
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: postit-frontend
-    depends_on:
-      api:
-        condition: service_healthy
-    ports:
-      - "3000:80"
-    networks:
-      - postit-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 768M
+        reservations:
+          cpus: "0.25"
+          memory: 384M
+    security_opt:
+      - no-new-privileges:true
+    # The JVM needs /tmp for temp files. All other paths are read-only.
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777,size=128m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
 
 networks:
   postit-network:
