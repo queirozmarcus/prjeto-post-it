@@ -1,0 +1,74 @@
+# Claude Code Ignore File — Post-it (Java 21 + Spring Boot)
+
+# === Java Specific ===
+target/
+.gradle/
+*.class
+*.jar
+*.war
+.classpath
+.project
+.settings/
+*.jks
+.factorypath
+.sts4-cache/
+
+# === Maven ===
+.mvn/wrapper/
+mvn.cmd
+mvn.bat
+
+# === Gradle ===
+gradle/wrapper/
+gradlew
+gradlew.bat
+
+# === Environment & Secrets ===
+.env
+.env.local
+*.pem
+*.key
+*.crt
+
+# === IDE ===
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+*.swp
+*.swo
+*~
+
+# === Build & Artifacts ===
+build/
+dist/
+coverage/
+.jacoco/
+
+# === Testing ===
+.junit-platform-engine-cache/
+junit-platform.properties
+
+# === Logs ===
+logs/
+*.log
+
+# === Database ===
+*.db
+*.sqlite
+*.sqlite3
+
+# === Git ===
+.git/
+.github/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === Node/npm (for frontend tooling) ===
+node_modules/
+npm-debug.log*
+.next/
+dist/
